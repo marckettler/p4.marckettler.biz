@@ -26,5 +26,12 @@ class base_controller {
 			$this->template->set_global('user', $this->user);
 			
 	}
-	
+
+    # Method to clean inputs that include XSS Attacks
+    protected function stop_xss($input)
+    {
+        # Probably need to do more than this
+        return strip_tags($input);
+    } # End stop_xss
+
 } # eoc

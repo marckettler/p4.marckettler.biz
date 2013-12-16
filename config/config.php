@@ -14,7 +14,7 @@ If you want a different default time format for this app, set it below
 */
 
 # What is the name of this app?
-	define('APP_NAME', 'BBSB Team Manager');
+define('APP_NAME', 'BBSB Team Manager');
 
 # When email is sent out from the server, where should it come from?
 # Ideally, this should match the domain name
@@ -31,7 +31,7 @@ A email designated to receive messages from the server. Examples:
 define('SYSTEM_EMAIL', 'marckettler@g.harvard.edu');
 
 # Default DB name for this app
-define('DB_NAME', "marckett_p4_marckettler_biz");
+define('DB_NAME', 'marckett_p4_marckettler_biz');
 
 # Timezone
 define('TIMEZONE', 'America/New_York');
