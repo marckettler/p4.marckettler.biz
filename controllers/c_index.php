@@ -20,7 +20,8 @@ class index_controller extends base_controller {
 			
 		# Now set the <title> tag
 			$this->template->title = "BBSB Team Manager";
-	
+
+
 		# CSS/JS includes
 			/*
 			$client_files_head = Array("");

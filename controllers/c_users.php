@@ -24,9 +24,9 @@ class users_controller extends base_controller
         $this->template->content->common_form_inputs = View::instance("v_common_form_inputs");
 		# Render template
 		echo $this->template;	
-	} #end signup
+	} #end create user
 
-    # Process Signup
+    # Process Create User
 	public function p_create()
 	{
         $_POST['first_name'] = $this->stop_xss($_POST['first_name']);
@@ -36,9 +36,8 @@ class users_controller extends base_controller
         # Makes sure the user is logged in
         $this->userObj->login($_POST["email"],$_POST["password"]);
         # Sign up complete forward to profile page
-        //Router::redirect("/profile/view/");
-        echo "user created";
-	} #end signup post
+        Router::redirect("/");
+	} #end create user post
 
     # Render Log In Page
 	public function login($error = NULL)
