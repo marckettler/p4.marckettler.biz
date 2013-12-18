@@ -36,7 +36,6 @@ class players_controller extends base_controller
 
     public function p_create()
     {
-
         # Clean input
         $_POST['player_name'] = $this->stop_xss($_POST['player_name']);
         # check to see if the current user is this player
@@ -68,15 +67,4 @@ class players_controller extends base_controller
 
         Router::redirect('/players/create/');
     } # end create
-
-    # private helper function
-    # DB call that returns the current user's teams or
-    private function get_my_teams()
-    {
-        # Build the query to get all of the user's teams
-        $q = "SELECT * FROM teams WHERE managers_user_id =".$this->user->user_id;
-        return DB::instance(DB_NAME)->select_rows($q);
-
-    } # end get_all_users
-
 } # eoc

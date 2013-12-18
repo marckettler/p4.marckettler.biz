@@ -6,7 +6,7 @@
             <? if(count($teams)>0): ?>
                 <label for="teamID">Place on Roster of</label>
                 <select class="form-control" name="team_id" id="teamID">
-                <option value="0">Just Create</option>
+                <option value="0">Create player with no team selected</option>
                 <? foreach($teams as $team): ?>
                     <option value="<?= $team['team_id'] ?>"> <?= $team['team_name'] ?></option>
                 <? endforeach ?>
