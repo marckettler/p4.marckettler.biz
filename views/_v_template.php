@@ -18,7 +18,7 @@
 	
 </head>
 
-<body>	
+<body <? if(isset($scoreCard)) echo 'onload="pageLoad()"'; ?>>
     <div class="container">
         <div class="navbar navbar-inverse navbar-static-top">
             <div class="navbar-header">
@@ -42,16 +42,16 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Teams<b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li><a href="#">My Teams</a></li>
-                                <li><a href="#">All Teams</a></li>
+                                <li><a href="/teams/index">My Teams</a></li>
+                                <li><a href="/teams/create">Create a Team</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Players<b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li><a href="/users/show_all_users">Free Agents</a></li>
-                                <li><a href="/users/following">All Players</a></li>
-                                <li><a href="/users/followed_by">Teammates</a></li>
+                                <li><a href="/players/create">Create Player</a></li>
+                                <li><a href="#">All Players</a></li>
+                                <li><a href="#">Teammates</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">

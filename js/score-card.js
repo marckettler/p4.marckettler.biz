@@ -6,7 +6,6 @@
  * Created by Marc Kettler on 11/20/13.
  */
 
-
 /**
  *
  * @param canvas The jquery Canvas object this Scorecard in Drawn on
@@ -14,7 +13,7 @@
  * @param batters The number of batters in the lineup
  * @constructor
  */
-function ScoreCard(canvas,overlay,batters)
+function ScoreCard(canvas,overlay,batters,teamName)
 {
     this.canvas = canvas;
     this.overlay = overlay;
@@ -31,9 +30,9 @@ function ScoreCard(canvas,overlay,batters)
     this.onFirst = null;
     this.onSecond = null;
     this.onThird = null;
-    this.playerBoxes = new Array(batters);
+    this.playerBoxes = new Array(batters.length);
     //create the two dimentional array of eventboxes
-    this.eventBoxes = new Array(batters);
+    this.eventBoxes = new Array(batters.length);
     for (var i = 0; i < this.eventBoxes.length; i++)
     {
         this.eventBoxes[i] = new Array(10);
@@ -51,8 +50,7 @@ function ScoreCard(canvas,overlay,batters)
     //initialize and draw playerBoxes
     for (var i = 0; i < this.eventBoxes.length; i++)
     {
-
-        this.playerBoxes[i] = new PlayerBox(this.canvas[0],new Player("Player "+(i+1),i+10,i+1),0,this.y);
+        this.playerBoxes[i] = new PlayerBox(this.canvas[0],new Player(batters[i].player_name.substring(0,9),batters[i].number,batters[i].position),0,this.y);
         this.playerBoxes[i].draw();
         this.y += 50;
     }
@@ -116,7 +114,7 @@ function ScoreCard(canvas,overlay,batters)
         var height = 25;
         var ctx = canvas.getContext("2d");
         ctx.font = height/2+'px Sans-Serif';
-        ctx.fillText  ("Team: Team Name     Date: "+new Date().toDateString(),x+(width/45), y+(height/1.33));
+        ctx.fillText  ("Team: " +teamName+"     Date: "+new Date().toDateString(),x+(width/45), y+(height/1.33));
         ctx.strokeRect(x,y,width,height);
     }
 
@@ -996,7 +994,8 @@ function ScoreCard(canvas,overlay,batters)
 
     // must come after the method definition because it is called in the constructor
     this.startInning();
-}
+}//end Scorecard
+
 /**
  * The LineScore is the total of runs and hits at the bottom of the scorecard
  * @param canvas the canvas to draw the linescore on
