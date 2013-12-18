@@ -67,4 +67,23 @@ class players_controller extends base_controller
 
         Router::redirect('/players/create/');
     } # end create
+
+    public function view_all()
+    {
+        #Setup view
+        $this->template->content = View::instance('v_players_view_all');
+        $this->template->title = 'View all Players';
+
+        $q = "SELECT team_name,player_name, singles,doubles,triples,home_runs
+              FROM players, plays_for_team, teams
+              WHERE player_id = players_player_id
+              AND team_id = teams_team_id
+              AND managers_user_id = ".$this->user->user_id;
+
+        # Get teams of the currently logged in user
+        $players = DB::instance(DB_NAME)->select_rows($q);
+        $this->template->content->players = $players;
+
+        echo $this->template;
+    }
 } # eoc

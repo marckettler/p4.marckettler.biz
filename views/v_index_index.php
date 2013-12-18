@@ -11,3 +11,6 @@
         Not Logged in.
     </p>
 <? endif ?>
+<p>
+    Best viewed at minimum screen resolution 1000px - Working on this
+</p>

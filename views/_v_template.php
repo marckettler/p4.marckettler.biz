@@ -50,8 +50,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Players<b class="caret"></b></a>
                             <ul class="dropdown-menu">
                                 <li><a href="/players/create">Create Player</a></li>
-                                <li><a href="#">All Players</a></li>
-                                <li><a href="#">Teammates</a></li>
+                                <li><a href="/players/view_all">All Players</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
