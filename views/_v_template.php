@@ -63,6 +63,7 @@
                     <?php else: ?>
                         <li><a href="/users/login">Log In</a></li>
                         <li><a href="/users/create">Create Account</a></li>
+                        <li><a href="/games/demo_game">Demo ScoreCard</a></li>
                     <?php endif; ?>
                 </ul>
             </div>
