@@ -12,5 +12,5 @@
     </p>
 <? endif ?>
 <p>
-    Best viewed at minimum screen resolution 1000px - Working on this
+    Best viewed at minimum screen width 1000px - Working on this
 </p>
