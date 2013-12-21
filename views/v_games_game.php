@@ -1,3 +1,5 @@
+<input type="hidden" id="team_id" value="<?= $team_id ?>">
+<input type="hidden" id="team_name" value="<?= urldecode($team_name) ?>">
 <div class="scContainer">
     <canvas class="bg" id="bg"></canvas>
     <canvas class="fg" id="fg"></canvas>
@@ -16,10 +18,10 @@
         </div>
         <h3>Outs</h3>
         <div>
-            <button type="button" class="fly-out">Fly Ball</button>
-            <button type="button" class="ground-out">Ground Ball</button>
-            <button type="button" class="pop-out">Pop Up</button>
-            <button type="button" class="fielders-choice-out brOptions">Fielder's Choice</button>
+            <button type="button" class="fo fly-out">Fly Ball</button>
+            <button type="button" class="go ground-out">Ground Ball</button>
+            <button type="button" class="po pop-out">Pop Up</button>
+            <button type="button" class="fco fielders-choice-out brOptions">Fielder's Choice</button>
             <button type="button" class="next-ab" onclick="scoreCard.processAB('K')">Strikeout</button>
             <button type="button" class="next-ab brOptions" onclick="scoreCard.processAB('SF')">Sac Fly</button>
             <button type="button" class="next-ab brOptions" onclick="scoreCard.processAB('SH')">Sac Hit/Bunt</button>
@@ -41,36 +43,20 @@
         </div>
         <h3>Double Play</h3>
         <div>
-            <button type="button" id="1H" class="fbOptions">1st & 2nd</button>
-            <button type="button" id="2H" class="sbOptions">1st & 3rd</button>
-            <button type="button" id="3H" class="tbOptions">1st & Home</button>
-            <button type="button" id="21" class="dp21Options">2nd & 3rd</button>
-            <button type="button" id="31" class="dp31Options">2nd & Home</button>
-            <button type="button" id="32dp" class="dp32Options">3rd & Home</button>
+            <button type="button" id="1H" class="dp fbOptions">1st & 2nd</button>
+            <button type="button" id="2H" class="dp sbOptions">1st & 3rd</button>
+            <button type="button" id="3H" class="dp tbOptions">1st & Home</button>
+            <button type="button" id="21" class="dp dp21Options">2nd & 3rd</button>
+            <button type="button" id="31" class="dp dp31Options">2nd & Home</button>
+            <button type="button" id="32dp" class="dp dp32Options">3rd & Home</button>
         </div>
         <h3>Triple Play</h3>
         <div>
-            <button type="button" id="123" class="tp123Options">1st & 2nd & 3rd</button>
-            <button type="button" id="12H" class="tp12HOptions">1st & 2nd & Home</button>
-            <button type="button" id="13H" class="tp13HOptions">1st & 3rd & Home</button>
-            <button type="button" id="23H" class="tp23HOptions">2nd & 3rd & Home</button>
+            <button type="button" id="123" class="tp tp123Options">1st & 2nd & 3rd</button>
+            <button type="button" id="12H" class="tp tp12HOptions">1st & 2nd & Home</button>
+            <button type="button" id="13H" class="tp tp13HOptions">1st & 3rd & Home</button>
+            <button type="button" id="23H" class="tp tp23HOptions">2nd & 3rd & Home</button>
         </div>
-    </div>
-</div>
-<div id="advance-runner-dialog-form" title="Advance Runners">
-    <div>
-        <button type="button" id="1bH">1-2</button>
-        <button type="button" onclick="scoreCard.postAB('1x2')">1x2</button>
-        <button type="button" onclick="scoreCard.postAB('1-3')">1-3</button>
-        <button type="button" onclick="scoreCard.postAB('1x3')">1x3</button>
-        <button type="button" onclick="scoreCard.postAB('1-H')">1-H</button>
-        <button type="button" onclick="scoreCard.postAB('1xH')">1xH</button>
-        <button type="button" onclick="scoreCard.postAB('2-3')">2-3</button>
-        <button type="button" onclick="scoreCard.postAB('2x3')">2x3</button>
-        <button type="button" onclick="scoreCard.postAB('2-H')">2-H</button>
-        <button type="button" onclick="scoreCard.postAB('2xH')">2xH</button>
-        <button type="button" onclick="scoreCard.postAB('3-H')">3-H</button>
-        <button type="button" onclick="scoreCard.postAB('3xH')">3xH</button>
     </div>
 </div>
 <div id="ground-out-dialog" title="Out from">

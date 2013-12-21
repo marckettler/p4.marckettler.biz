@@ -53,6 +53,24 @@ class teams_controller extends base_controller
         #Setup view
         $this->template->content = View::instance('v_teams_view');
         $this->template->title = 'Create a Team';
+
+        #Load dataTables css
+        $client_files_head = Array(
+            "/css/jquery.dataTables.css"
+        );
+
+        $this->template->client_files_head = Utils::load_client_files($client_files_head);
+
+
+        # Load JS files
+        $client_files_body = Array(
+            "/js/jquery.dataTables.js",
+            "/js/teams/teams_view.js"
+        );
+
+        $this->template->client_files_body = Utils::load_client_files($client_files_body);
+
+
         $players = $this->get_players_stats($team_id);
         $this->template->content->players = $players;
         echo $this->template;

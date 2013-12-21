@@ -12,6 +12,12 @@ class games_controller extends base_controller
         }*/
 	} # end constructor
 
+    public function load_team($team_id)
+    {
+        $lineup = $this->get_players($team_id);
+        echo json_encode($lineup);
+    }
+
     # Render Scorecard for a new game
     # $team_id of the team you are keeping score for
     public function init_game($team_id,$team_name)
@@ -23,7 +29,8 @@ class games_controller extends base_controller
         $this->template->content = View::instance('v_games_game');
         $this->template->title = 'New Game Info';
         $this->template->scoreCard = 'true';
-        $lineup = $this->get_players($team_id);
+        $this->template->content->team_id = $team_id;
+        $this->template->content->team_name = $team_name;
 
         $client_files_h = Array(
             '/css/p4.css',
@@ -32,19 +39,12 @@ class games_controller extends base_controller
         $client_files_b = Array(
             '/js/jquery-1.9.1.js',
             '/js/jquery-ui-1.10.3.custom.js',
-            '/js/score-card.js'
+            '/js/score-card.js',
+            '/js/games/games_init_game.js'
         );
         $this->template->client_files_head = Utils::load_client_files($client_files_h);
         $this->template->client_files_body = Utils::load_client_files($client_files_b);
-        $this->template->client_files_head .= '<script> var scoreCard;
-                                                        var controlArea;
-                                                        function pageLoad()
-                                                        {
-                                                            scoreCard = new ScoreCard($("#bg"),$("#fg"),'.json_encode($lineup).',"'.urldecode($team_name).'");
-                                                            controlArea = new ControlArea(scoreCard);
-                                                            scoreCard.controlArea = controlArea;
-                                                        }
-                                              </script>';
+
         echo $this->template;
     } # end init game
 

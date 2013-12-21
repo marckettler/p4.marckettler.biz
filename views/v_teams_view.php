@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-bordered table-condensed">
+    <table id="teamData">
         <thead>
             <tr>
                 <th>Name</th>

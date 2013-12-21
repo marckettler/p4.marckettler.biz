@@ -18,7 +18,7 @@
 	
 </head>
 
-<body <? if(isset($scoreCard)) echo 'onload="pageLoad()"'; ?>>
+<body>
     <div class="container">
         <div class="navbar navbar-inverse navbar-static-top">
             <div class="navbar-header">
