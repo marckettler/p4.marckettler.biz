@@ -40,7 +40,7 @@ $(document).ready(function() {
             scoreCard.controlArea = controlArea;
             if(load==1)
             {
-                scoreCard.loadGame(scoreCard);
+                scoreCard.loadGame(0);
             }
         }
     }); // end ajax setup

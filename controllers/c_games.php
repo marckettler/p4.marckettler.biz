@@ -28,11 +28,12 @@ class games_controller extends base_controller
         echo json_encode($result);
     }
 
-    public function save_play($play_log,$game_id)
+    public function save_play($play_log,$game_id,$message)
     {
         $qArray = Array( "play_log" => $play_log);
         DB::instance(DB_NAME)->update('games',$qArray,"WHERE game_id = $game_id");
-        echo "Game state updates";
+
+        echo $message;
     }
     # Render Scorecard for a new game
     # $team_id of the team you are keeping score for
@@ -50,7 +51,6 @@ class games_controller extends base_controller
         }
         else
         {
-            @setcookie("game_id", "5",strtotime('+1 year') , '/');
             $game_id = $_COOKIE['game_id'];
             $this->template->content->load_game = $game_id;
             /*

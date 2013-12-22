@@ -2,6 +2,7 @@
 <input type="hidden" id="team_name" value="<?= urldecode($team_name) ?>">
 <input type="hidden" id="game_id" value="<?= $game_id ?>">
 <input type="hidden" id="load_game" value="<?=(isset($load_game) ? '1' : '0' );?>">
+<h3><span class="label label-success" id="status"></span></h3>
 <div class="scContainer">
     <canvas class="bg" id="bg"></canvas>
     <canvas class="fg" id="fg"></canvas>
@@ -58,6 +59,12 @@
             <button type="button" id="12H" class="tp tp12HOptions">1st & 2nd & Home</button>
             <button type="button" id="13H" class="tp tp13HOptions">1st & 3rd & Home</button>
             <button type="button" id="23H" class="tp tp23HOptions">2nd & 3rd & Home</button>
+        </div>
+        <h3>Options</h3>
+        <div>
+            <button type="button" class="options" id="undo">Undo Last Play</button>
+            <button type="button" class="options" id="close">Close Game</button>
+            <button type="button" class="options" id="end">End Game</button>
         </div>
     </div>
 </div>

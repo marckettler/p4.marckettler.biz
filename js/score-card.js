@@ -22,8 +22,8 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     this.canvas[0].height = 550;
     //reference to control area
     this.controlArea = null;
-    this.playLog = "";
     this.gameID = gameID;
+    this.playLog = "";
     this.inning = 1;
     this.runs = 0;
     this.hits = 0;
@@ -842,6 +842,12 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
                 this.recordOut(this.currentAB);
                 this.advanceAllOneRBI();
                 break;
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
             case '7':
             case '8':
             case '9':
@@ -1134,8 +1140,33 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     }
 
     this.loadGame = loadGame;
-    function loadGame()
+    function loadGame(undo)
     {
+        if(undo==1)
+        {
+            this.endInning();
+            this.inning = 1;
+            this.x=120;
+            this.y=25;
+            this.abNum = 1;
+            //initialize and draw EventBoxez
+            for (var i = 0; i < this.eventBoxes[0].length; i++)
+            {
+                for (var j = 0; j < this.eventBoxes.length; j++)
+                {
+                    this.eventBoxes[j][i] = new EventBox(this,this.canvas[0],this.playerBoxes[j],this.abNum,this.x,this.y);
+                    this.eventBoxes[j][i].draw();
+                    this.y += 50;
+                    this.abNum++;
+                }
+                this.x += 50;
+                this.y = 25;
+            }
+            this.currentAB = this.eventBoxes[0][0];
+            this.onDeck = this.findEventBox(this.currentAB.abNum + 1);
+            this.startInning();
+            this.playLog = "";
+        }
         var scoreCard = this;
         $.ajax({
             type: 'POST',
@@ -1146,12 +1177,13 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
             success: function(response) {
                 var plays = $.parseJSON(response);
                 var play_log = plays[0].play_log.split(",");
+                console.log(play_log);
+
                 play_log.forEach(function(entry) {
                     if(entry.length!=0)
                     {
                         if(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK')
                         {
-                            console.log("entry="+entry);
                             scoreCard.preAB(entry);
                         }
 
@@ -1170,8 +1202,10 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
                         }
                     }
                 });
-                scoreCard.loadFlag = 0;
 
+                (undo==1) ? $('#status').text("Undid Last Play") : $('#status').text("Game Loaded");
+
+                scoreCard.loadFlag = 0;
             }
         }); // end ajax setup
 
@@ -1366,9 +1400,7 @@ function ControlArea(scoreCard)
     $( ".po")
         .button()
         .click(function(){
-            var play = this.id;
-            scoreCard.playLog = play+',';
-            scoreCard.flyOut(play);
+            scoreCard.processAB(this.id);
             scoreCard.nextAB();
             poDialog.dialog("close");
         });
@@ -1377,6 +1409,38 @@ function ControlArea(scoreCard)
         .click(function() {
             $( "#advance-runner-dialog-form" ).dialog( "open" );
         });
+
+    $( ".options" )
+        .button()
+        .click(function() {
+            if(this.id=='undo')
+            {
+                var plays = scoreCard.playLog.split(',');
+                plays = plays.slice(0,plays.length-2);
+                plays.push("");
+                $.ajax({
+                    type: 'POST',
+                    url: '/games/save_play/'+plays+'/'+scoreCard.gameID+'/undo',
+                    beforeSend: function() {
+                        //update some message
+                    },
+                    success: function(response) {
+                        $('#status').text(response);
+                    }
+                }); // end ajax setup
+                scoreCard.loadFlag = 1;
+                scoreCard.loadGame(1);
+            }
+            else if(this.id=='close')
+            {
+
+            }
+            else if(this.id=='end')
+            {
+
+            }
+        });
+
     this.accordion = $( "#accordion" ).accordion({
         collapsible: true,
         heightStyle: "content"
@@ -1422,7 +1486,6 @@ function ControlArea(scoreCard)
             this.accordion.find( ".ui-accordion-header:eq(4)" ).show();
         }
     }
-
 
     this.toggleDoublePlayEvents = toggleDoublePlayEvents;
     /**
@@ -1971,12 +2034,12 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         {
             $.ajax({
                 type: 'POST',
-                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID,
+                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type,
                 beforeSend: function() {
                     //update some message
                 },
                 success: function(response) {
-                    console.log(response);
+                    $('#status').text(response);
                 }
             }); // end ajax setup
         }
@@ -1996,12 +2059,12 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         {
             $.ajax({
                 type: 'POST',
-                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID,
+                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type+' by '+scoreCard.currentAB.playerBox.player.name,
                 beforeSend: function() {
                     //update some message
                 },
                 success: function(response) {
-                    console.log(response);
+                    $('#status').text(response);
                 }
             }); // end ajax setup
         }
@@ -2021,12 +2084,12 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         {
             $.ajax({
                 type: 'POST',
-                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID,
+                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type,
                 beforeSend: function() {
                     //update some message
                 },
                 success: function(response) {
-                    console.log(response);
+                    $('#status').text(response);
                 }
             }); // end ajax setup
         }
