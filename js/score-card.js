@@ -13,14 +13,17 @@
  * @param batters The number of batters in the lineup
  * @constructor
  */
-function ScoreCard(canvas,overlay,batters,teamName)
+function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
 {
+    this.loadFlag = loadFlag;
     this.canvas = canvas;
     this.overlay = overlay;
     this.canvas[0].width = 1000;
     this.canvas[0].height = 550;
     //reference to control area
     this.controlArea = null;
+    this.playLog = "";
+    this.gameID = gameID;
     this.inning = 1;
     this.runs = 0;
     this.hits = 0;
@@ -64,7 +67,7 @@ function ScoreCard(canvas,overlay,batters,teamName)
     {
         for (var j = 0; j < this.eventBoxes.length; j++)
         {
-            this.eventBoxes[j][i] = new EventBox(this.canvas[0],this.playerBoxes[j],this.abNum,this.x,this.y);
+            this.eventBoxes[j][i] = new EventBox(this,this.canvas[0],this.playerBoxes[j],this.abNum,this.x,this.y);
             this.eventBoxes[j][i].draw();
             this.y += 50;
             this.abNum++;
@@ -307,6 +310,11 @@ function ScoreCard(canvas,overlay,batters,teamName)
             {
                 this.controlArea.toggleDoublePlayEvents("hide");
             }
+
+            if(this.outs == 2)
+            {
+                this.controlArea.sacOptions.hide();
+            }
         }
     }
 
@@ -389,6 +397,7 @@ function ScoreCard(canvas,overlay,batters,teamName)
     this.nextAB = nextAB
     function nextAB()
     {
+        console.log("Play Log: " + this.playLog);
         //if inning is over draw end of inning in current AB.
         if(this.outs==3)
         {
@@ -602,7 +611,6 @@ function ScoreCard(canvas,overlay,batters,teamName)
     function flyOut(to)
     {
         this.recordOut(this.currentAB);
-        this.currentAB.hit(to);
     }
 
     /**
@@ -761,10 +769,13 @@ function ScoreCard(canvas,overlay,batters,teamName)
                 this.advanceAllOneNoRBI(eventString);
                 break;
         }
+
+        this.currentAB.preAB(eventString);
         this.disableMenuOptions();
         if(this.outs==3)
         {
             this.currentAB.endInning();
+            //must code auxiliary box
             this.endInning();
             this.startInning();
         }
@@ -830,6 +841,19 @@ function ScoreCard(canvas,overlay,batters,teamName)
             case 'SH':
                 this.recordOut(this.currentAB);
                 this.advanceAllOneRBI();
+                break;
+            case '7':
+            case '8':
+            case '9':
+                this.flyOut(abString);
+                break;
+            case '13':
+            case '23':
+            case '33':
+            case '43':
+            case '53':
+            case '63':
+                this.flyOut(abString);
                 break;
         }
         this.currentAB.hit(abString);
@@ -992,6 +1016,166 @@ function ScoreCard(canvas,overlay,batters,teamName)
         }
     }// end postAB()
 
+    this.processDP = processDP;
+    function processDP(dpString)
+    {
+        switch(dpString)
+        {
+            case 'DP1H':
+                this.recordOut(scoreCard.onFirst);
+                this.currentAB.outToSecond('');
+                this.onFirst = null;
+                this.recordOut(this.currentAB);
+            break;
+            case 'DP2H':
+                this.recordOut(this.onSecond);
+                this.currentAB.outToThird('');
+                this.onSecond = null;
+                this.recordOut(this.currentAB);
+            break;
+            case 'DP3H':
+                this.recordOut(this.onSecond);
+                this.currentAB.outToHome('');
+                this.onThird = null;
+                this.recordOut(this.currentAB);
+            break;
+            case 'DP21':
+                this.recordOut(this.onFirst);
+                this.currentAB.outToSecond('');
+                this.onFirst = null;
+                this.recordOut(this.onSecond);
+                this.currentAB.outToThird('');
+                this.onSecond = null;
+            break;
+            case 'DP31':
+                this.recordOut(this.onFirst);
+                this.currentAB.outToSecond('');
+                this.onFirst = null;
+                this.recordOut(this.onThird);
+                this.currentAB.outToHome('');
+                this.onThird = null;
+            break;
+            case 'DP32dp':
+                this.recordOut(this.onSecond);
+                this.currentAB.outToThird('');
+                this.onSecond = null;
+                this.recordOut(this.onThird);
+                this.currentAB.outToHome('');
+                this.onThird = null;
+            break;
+            case 'TP123':
+                this.recordOut(this.onFirst);
+                this.currentAB.outToSecond('');
+                this.recordOut(this.onSecond);
+                this.currentAB.outToThird('');
+                this.recordOut(this.currentAB);
+                break;
+            case 'TP12H':
+                this.recordOut(this.onFirst);
+                this.currentAB.outToSecond('');
+                this.recordOut(this.onThird);
+                this.currentAB.outToHome('');
+                this.recordOut(this.currentAB);
+                break;
+            case 'TP23H':
+                this.recordOut(this.onFirst);
+                this.currentAB.outToSecond('');
+                this.recordOut(this.onSecond);
+                this.currentAB.outToThird('');
+                this.recordOut(this.onThird);
+                this.currentAB.outToHome('');
+                break;
+            case 'TP13H':
+                this.recordOut(this.onSecond);
+                this.currentAB.outToThird('');
+                this.recordOut(this.onThird);
+                this.currentAB.outToHome('');
+                this.recordOut(this.currentAB)
+                break;
+        }
+        if(this.outs!=3)
+        {
+            this.advanceAllOneNoRBI('');
+        }
+        this.currentAB.dp(dpString);
+        this.nextAB();
+        this.showRunners(this.currentAB);
+    }
+
+    this.processFC = processFC;
+    function processFC(fcString)
+    {
+        // runner will be passed to fcOut
+        var runner;
+        switch(fcString.substring(1))
+        {
+            case '2':
+                runner = this.onThird;
+                // take runner off third
+                this.onThird = null;
+                this.currentAB.outToHome(fcString);
+                break;
+            case '4':
+            case '6':
+                runner = this.onFirst;
+                this.onFirst = null;
+                this.currentAB.outToSecond(fcString);
+                break;
+            case '5':
+                runner = this.onSecond;
+                this.onSecond = null;
+                this.currentAB.outToThird(fcString);
+                break;
+        }
+        this.advanceAllOneRBI();
+        this.fcOut("FC"+fcString, runner);
+        this.nextAB();
+        this.showRunners(this.currentAB);
+    }
+
+    this.loadGame = loadGame;
+    function loadGame()
+    {
+        var scoreCard = this;
+        $.ajax({
+            type: 'POST',
+            url: '/games/ajax_load_game/'+this.gameID,
+            beforeSend: function() {
+                //update some message
+            },
+            success: function(response) {
+                var plays = $.parseJSON(response);
+                var play_log = plays[0].play_log.split(",");
+                play_log.forEach(function(entry) {
+                    if(entry.length!=0)
+                    {
+                        if(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK')
+                        {
+                            console.log("entry="+entry);
+                            scoreCard.preAB(entry);
+                        }
+
+                        if(entry.substring(0,2)=='DP'||entry.substring(0,2)=='TP')
+                        {
+                            scoreCard.processDP(entry);
+                        }
+                        else if(entry.substring(0,2)=='FC')
+                        {
+                            scoreCard.processFC(entry.substring(2));
+                        }
+                        else if(!(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK'))
+                        {
+                            scoreCard.processAB(entry);
+                            scoreCard.nextAB();
+                        }
+                    }
+                });
+                scoreCard.loadFlag = 0;
+
+            }
+        }); // end ajax setup
+
+    }
     // must come after the method definition because it is called in the constructor
     this.startInning();
 }//end Scorecard
@@ -1058,6 +1242,8 @@ function ControlArea(scoreCard)
     this.tp23HOptions = $('.tp23HOptions');
     this.dsOptions = $('.dsOptions');
     this.tsOptions = $('.tsOptions');
+    this.sacOptions = $('.sac');
+    this.fcOptions = $('.fielders-choice-out');
 
     //The Dialog to display location specifiers for Fly Ball outs.
     var foDialog = $( "#fly-out-dialog" ).dialog({
@@ -1109,159 +1295,15 @@ function ControlArea(scoreCard)
     });
 
     //create click functions for unique buttons such as double and triple plays
-    $( "#1H")
+    $( ".dp")
         .button()
         .click(function(){
-            scoreCard.recordOut(scoreCard.onFirst);
-            scoreCard.currentAB.outToSecond('DP');
-            scoreCard.onFirst = null;
-            scoreCard.recordOut(scoreCard.currentAB);
-            scoreCard.currentAB.hit('DP');
-            if(scoreCard.outs!=3)
-            {
-                scoreCard.advanceAllOneNoRBI('');
-            }
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
-            dpDialog.dialog("close");
+            scoreCard.processDP("DP"+this.id);
         });
-    $( "#2H")
+    $( ".tp")
         .button()
         .click(function(){
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToThird('DP');
-            scoreCard.onSecond = null;
-            scoreCard.recordOut(scoreCard.currentAB);
-            scoreCard.currentAB.hit('DP');
-            if(scoreCard.outs!=3)
-            {
-                scoreCard.advanceAllOneNoRBI('');
-            }
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
-            dpDialog.dialog("close");
-        });
-    $( "#3H")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToHome('DP');
-            scoreCard.onThird = null;
-            scoreCard.recordOut(scoreCard.currentAB);
-            scoreCard.currentAB.hit('DP');
-            if(scoreCard.outs!=3)
-            {
-                scoreCard.advanceAllOneNoRBI('');
-            }
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
-            dpDialog.dialog("close");
-        });
-    $( "#21")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onFirst);
-            scoreCard.currentAB.outToSecond('DP');
-            scoreCard.onFirst = null;
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToThird('DP');
-            scoreCard.onSecond = null;
-            scoreCard.currentAB.hit('DP');
-            if(scoreCard.outs!=3)
-            {
-                scoreCard.advanceAllOneNoRBI('');
-            }
-            scoreCard.onFirst = scoreCard.currentAB;
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
-            dpDialog.dialog("close");
-        });
-    $( "#31")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onFirst);
-            scoreCard.currentAB.outToSecond('DP');
-            scoreCard.onFirst = null;
-            scoreCard.recordOut(scoreCard.onThird);
-            scoreCard.currentAB.outToHome('DP');
-            scoreCard.onThird = null;
-            scoreCard.currentAB.hit('DP');
-            if(scoreCard.outs!=3)
-            {
-                scoreCard.advanceAllOneNoRBI('');
-            }
-            scoreCard.onFirst = scoreCard.currentAB;
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
-            dpDialog.dialog("close");
-        });
-    $( "#32dp")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToThird('DP');
-            scoreCard.onSecond = null;
-            scoreCard.recordOut(scoreCard.onThird);
-            scoreCard.currentAB.outToHome('DP');
-            scoreCard.onThird = null;
-            scoreCard.currentAB.hit('DP');
-            if(scoreCard.outs!=3)
-            {
-                scoreCard.advanceAllOneNoRBI('');
-            }
-            scoreCard.onFirst = scoreCard.currentAB;
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
-            dpDialog.dialog("close");
-        });
-    $( "#123")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onFirst);
-            scoreCard.currentAB.outToSecond('');
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToThird('');
-            scoreCard.recordOut(scoreCard.currentAB);
-            scoreCard.currentAB.hit('TP');
-            scoreCard.nextAB();
-            tpDialog.dialog("close");
-        });
-    $( "#12H")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onFirst);
-            scoreCard.currentAB.outToSecond('');
-            scoreCard.recordOut(scoreCard.onThird);
-            scoreCard.currentAB.outToHome('');
-            scoreCard.recordOut(scoreCard.currentAB);
-            scoreCard.currentAB.hit('TP');
-            scoreCard.nextAB();
-            tpDialog.dialog("close");
-        });
-    $( "#23H")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onFirst);
-            scoreCard.currentAB.outToSecond('');
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToThird('');
-            scoreCard.recordOut(scoreCard.onThird);
-            scoreCard.currentAB.outToHome('');
-            scoreCard.currentAB.hit('TP');
-            scoreCard.nextAB();
-            tpDialog.dialog("close");
-        });
-    $( "#13H")
-        .button()
-        .click(function(){
-            scoreCard.recordOut(scoreCard.onSecond);
-            scoreCard.currentAB.outToThird('');
-            scoreCard.recordOut(scoreCard.onThird);
-            scoreCard.currentAB.outToHome('');
-            scoreCard.recordOut(scoreCard.currentAB);
-            scoreCard.currentAB.hit('TP');
-            scoreCard.nextAB();
-            tpDialog.dialog("close");
+            scoreCard.processDP("TP"+this.id);
         });
 
     $( ".next-ab")
@@ -1289,7 +1331,7 @@ function ControlArea(scoreCard)
     $( ".fo")
         .button()
         .click(function() {
-            scoreCard.flyOut(this.id);
+            scoreCard.processAB(this.id);
             scoreCard.nextAB();
             foDialog.dialog("close");
         });
@@ -1301,7 +1343,7 @@ function ControlArea(scoreCard)
     $( ".go")
         .button()
         .click(function() {
-            scoreCard.flyOut(this.id);
+            scoreCard.processAB(this.id);
             scoreCard.nextAB();
             goDialog.dialog("close");
         });
@@ -1312,32 +1354,8 @@ function ControlArea(scoreCard)
         });
     $( ".fco")
         .button()
-        .click(function() {
-            // runner will be passed to fcOut
-            var runner;
-            switch(this.id.substring(1))
-            {
-                case '2':
-                    runner = scoreCard.onThird;
-                    // take runner off third
-                    scoreCard.onThird = null;
-                    scoreCard.currentAB.outToHome(this.id);
-                    break;
-                case '4':
-                case '6':
-                    runner = scoreCard.onFirst;
-                    scoreCard.currentAB.outToSecond(this.id);
-                    break;
-                case '5':
-                    runner = scoreCard.onSecond;
-                    scoreCard.onSecond = null;
-                    scoreCard.currentAB.outToThird(this.id);
-                    break;
-            }
-            scoreCard.advanceAllOneRBI();
-            scoreCard.fcOut("FC"+this.id, runner);
-            scoreCard.nextAB();
-            scoreCard.showRunners(scoreCard.currentAB);
+        .click(function(){
+            scoreCard.processFC(this.id);
             fcoDialog.dialog("close");
         });
     $( ".pop-out")
@@ -1347,8 +1365,10 @@ function ControlArea(scoreCard)
         });
     $( ".po")
         .button()
-        .click(function() {
-            scoreCard.flyOut(this.id);
+        .click(function(){
+            var play = this.id;
+            scoreCard.playLog = play+',';
+            scoreCard.flyOut(play);
             scoreCard.nextAB();
             poDialog.dialog("close");
         });
@@ -1374,11 +1394,13 @@ function ControlArea(scoreCard)
         if(option == "hide")
         {
             this.brOptions.hide();
+            this.fcOptions.hide();
             this.accordion.find( ".ui-accordion-header:eq(2)" ).hide();
         }
         else
         {
             this.brOptions.show();
+            this.fcOptions.show();
             this.accordion.find( ".ui-accordion-header:eq(2)" ).show();
         }
     }
@@ -1441,6 +1463,8 @@ function ControlArea(scoreCard)
         this.tp12HOptions.hide();
         this.tp13HOptions.hide();
         this.tp23HOptions.hide();
+        this.sacOptions.hide();
+        this.fcOptions.hide();
     }
 
     this.hideAll();
@@ -1530,7 +1554,7 @@ function PlayerBox(canvas,player,x,y)
  * @param y coordinate of this EVentBox
  * @constructor
  */
-function EventBox(canvas,playerBox,abNum,x,y)
+function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
 {
     var BOX_W_H = 50;
     this.x = x;
@@ -1935,6 +1959,29 @@ function EventBox(canvas,playerBox,abNum,x,y)
         this.ctx.fill();
     }
 
+    this.preAB= preAB;
+    /**
+     * Draws the event label for this ab such as S,D,T,H,W
+     * @param type - The type of event that ended this batters at Bat
+     */
+    function preAB(type)
+    {
+        scoreCard.playLog += type+',';
+        if(scoreCard.loadFlag!=1)
+        {
+            $.ajax({
+                type: 'POST',
+                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID,
+                beforeSend: function() {
+                    //update some message
+                },
+                success: function(response) {
+                    console.log(response);
+                }
+            }); // end ajax setup
+        }
+    }
+
     this.hit= hit;
     /**
      * Called the hit function but should probably be renamed Event
@@ -1943,7 +1990,47 @@ function EventBox(canvas,playerBox,abNum,x,y)
      */
     function hit(type)
     {
+
+        scoreCard.playLog += type+",";
+        if(scoreCard.loadFlag!=1)
+        {
+            $.ajax({
+                type: 'POST',
+                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID,
+                beforeSend: function() {
+                    //update some message
+                },
+                success: function(response) {
+                    console.log(response);
+                }
+            }); // end ajax setup
+        }
         this.hitString += type;
+        this.ctx.fillText(this.hitString,this.x+(BOX_W_H *.05),this.y+(BOX_W_H *.90));
+    }
+
+    this.dp = dp;
+    /**
+     * Draws the event label for this ab such as double plays
+     * @param type - The type of event that ended this batters at Bat
+     */
+    function dp(type)
+    {
+        scoreCard.playLog += type+",";
+        if(scoreCard.loadFlag!=1)
+        {
+            $.ajax({
+                type: 'POST',
+                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID,
+                beforeSend: function() {
+                    //update some message
+                },
+                success: function(response) {
+                    console.log(response);
+                }
+            }); // end ajax setup
+        }
+        this.hitString += type.substring(0,2);
         this.ctx.fillText(this.hitString,this.x+(BOX_W_H *.05),this.y+(BOX_W_H *.90));
     }
 

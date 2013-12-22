@@ -18,19 +18,53 @@ class games_controller extends base_controller
         echo json_encode($lineup);
     }
 
+    public function ajax_load_game()
+    {
+
+                # Build the query to get all of the user's teams
+        $q = "SELECT play_log FROM marckett_p4_marckettler_biz.games
+              WHERE game_id = ".$_COOKIE['game_id'];
+        $result = DB::instance(DB_NAME)->select_rows($q);
+        echo json_encode($result);
+    }
+
+    public function save_play($play_log,$game_id)
+    {
+        $qArray = Array( "play_log" => $play_log);
+        DB::instance(DB_NAME)->update('games',$qArray,"WHERE game_id = $game_id");
+        echo "Game state updates";
+    }
     # Render Scorecard for a new game
     # $team_id of the team you are keeping score for
     public function init_game($team_id,$team_name)
     {
-
-        //todo add query to store game info
-
-        #Setup view
+        $game_id=0;
         $this->template->content = View::instance('v_games_game');
-        $this->template->title = 'New Game Info';
+        //if the game is not current create a new game
+        if(!isset($_COOKIE['game_id']))
+        {
+            $qArray = Array( "teams_team_id" => $team_id);
+            # Insert using DB function that will sanitize the input
+            $game_id = DB::instance(DB_NAME)->insert('games',$qArray);
+            @setcookie("game_id", $game_id, strtotime('+1 year'), '/');
+        }
+        else
+        {
+            @setcookie("game_id", "5",strtotime('+1 year') , '/');
+            $game_id = $_COOKIE['game_id'];
+            $this->template->content->load_game = $game_id;
+            /*
+             * save for later for deleting cookie
+            @setcookie("game_id", "0", time()-3600, '/');
+            */
+            //die("Load game should happen here but for now just unsetting cookie game_id=$game_id");
+        }
+
+        $this->template->title = "Game $game_id";
         $this->template->scoreCard = 'true';
         $this->template->content->team_id = $team_id;
         $this->template->content->team_name = $team_name;
+        $this->template->content->game_id = $game_id;
 
         $client_files_h = Array(
             '/css/p4.css',
@@ -52,9 +86,6 @@ class games_controller extends base_controller
     # $team_id of the team you are keeping score for
     public function demo_game()
     {
-
-        //todo add query to store game info
-
         #Setup view
         $this->template->content = View::instance('v_games_game');
         $this->template->title = 'New Game Info';
@@ -87,9 +118,6 @@ class games_controller extends base_controller
     # $team_id of the team you are keeping score for
     public function new_game()
     {
-
-        //todo add query to store game info
-
         #Setup view
         $this->template->content = View::instance('v_games_new');
         $this->template->title = 'New Game Info';
@@ -117,4 +145,6 @@ class games_controller extends base_controller
         return count($result)>=9;
 
     } # end get_all_users
+
+
 } # eoc

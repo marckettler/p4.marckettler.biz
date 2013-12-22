@@ -19,6 +19,7 @@ $(document).ready(function() {
             $('.dp').hide();
             $('.tp').hide();
             $('.on-base').hide();
+            $('.fielders-choice-out').hide();
             $('h3').hide();
         },
         success: function(response) {
@@ -31,11 +32,16 @@ $(document).ready(function() {
             $('.dp').show();
             $('.tp').show();
             $('.on-base').show();
+            $('.fielders-choice-out').show();
             $('h3').show();
-            scoreCard = new ScoreCard($("#bg"),$("#fg"),$.parseJSON(response),$("#team_name")[0].value);
+            var load = $('#load_game')[0].value;
+            scoreCard = new ScoreCard($("#bg"),$("#fg"),$.parseJSON(response),$("#team_name")[0].value,$("#game_id")[0].value,load);
             controlArea = new ControlArea(scoreCard);
             scoreCard.controlArea = controlArea;
-
+            if(load==1)
+            {
+                scoreCard.loadGame(scoreCard);
+            }
         }
     }); // end ajax setup
 } );

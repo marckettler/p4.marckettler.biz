@@ -32,6 +32,8 @@
                 <option value="0">Designated Hitter</option>
                 <option value="10">Extra Outfielder</option>
             </select>
+            <label for="playerNumbrt">Player's Number</label>
+            <input type="text" class="form-control" name="number" id="playerNumber" placeholder="Number">
         <? endif ?>
     </div>
     <? if(!isset($exists)): ?>

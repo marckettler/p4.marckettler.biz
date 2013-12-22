@@ -48,9 +48,11 @@ class players_controller extends base_controller
         $team_id = $_POST['team_id'];
         $batting = $_POST['batting'];
         $position = $_POST['position'];
+        $number = $_POST['number'];
         unset($_POST['team_id']);
         unset($_POST['batting']);
         unset($_POST['position']);
+        unset($_POST['number']);
         # Insert new player
         $player_id = DB::instance(DB_NAME)->insert('players',$_POST);
         #clean post so it can be reused for team info
@@ -62,6 +64,7 @@ class players_controller extends base_controller
             $_POST['teams_team_id'] = $team_id;
             $_POST['batting'] = $batting;
             $_POST['position'] = $position;
+            $_POST['number'] = $number;
             DB::instance(DB_NAME)->insert('plays_for_team',$_POST);
         }
 

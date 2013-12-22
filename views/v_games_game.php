@@ -1,5 +1,7 @@
 <input type="hidden" id="team_id" value="<?= $team_id ?>">
 <input type="hidden" id="team_name" value="<?= urldecode($team_name) ?>">
+<input type="hidden" id="game_id" value="<?= $game_id ?>">
+<input type="hidden" id="load_game" value="<?=(isset($load_game) ? '1' : '0' );?>">
 <div class="scContainer">
     <canvas class="bg" id="bg"></canvas>
     <canvas class="fg" id="fg"></canvas>
@@ -18,13 +20,13 @@
         </div>
         <h3>Outs</h3>
         <div>
-            <button type="button" class="fo fly-out">Fly Ball</button>
-            <button type="button" class="go ground-out">Ground Ball</button>
-            <button type="button" class="po pop-out">Pop Up</button>
-            <button type="button" class="fco fielders-choice-out brOptions">Fielder's Choice</button>
+            <button type="button" class="fly-out">Fly Ball</button>
+            <button type="button" class="ground-out">Ground Ball</button>
+            <button type="button" class="pop-out">Pop Up</button>
+            <button type="button" class="fielders-choice-out brOptions">Fielder's Choice</button>
             <button type="button" class="next-ab" onclick="scoreCard.processAB('K')">Strikeout</button>
-            <button type="button" class="next-ab brOptions" onclick="scoreCard.processAB('SF')">Sac Fly</button>
-            <button type="button" class="next-ab brOptions" onclick="scoreCard.processAB('SH')">Sac Hit/Bunt</button>
+            <button type="button" class="next-ab sac brOptions" onclick="scoreCard.processAB('SF')">Sac Fly</button>
+            <button type="button" class="next-ab sac brOptions" onclick="scoreCard.processAB('SH')">Sac Hit/Bunt</button>
         </div>
         <h3>Base Running Events</h3>
         <div>
