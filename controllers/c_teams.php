@@ -27,11 +27,16 @@ class teams_controller extends base_controller
 	} # end logout
 
     # Create Team Page
-    public function create()
+    public function create($dupe=null,$team_name=NULL)
     {
         #Setup view
         $this->template->content = View::instance('v_teams_create');
         $this->template->title = 'Create a Team';
+        if(isset($dupe))
+        {
+            $this->template->content->dupe = $dupe;
+            $this->template->content->team_name = urldecode($team_name);
+        }
 
         echo $this->template;
     } # end create
@@ -43,7 +48,17 @@ class teams_controller extends base_controller
         # Associate this team with current user
         $_POST['managers_user_id'] = $this->user->user_id;
         # Insert using DB function that will sanitize the input
-        DB::instance(DB_NAME)->insert('teams',$_POST);
+        $team_name = $_POST['team_name'];
+        $q = "SELECT * FROM teams WHERE team_name='$team_name'";
+
+        if(count(DB::instance(DB_NAME)->select_rows($q))==0)
+        {
+            DB::instance(DB_NAME)->insert('teams',$_POST);
+        }
+        else
+        {
+            Router::redirect("/teams/create/dupe/".urlencode($team_name));
+        }
 
         Router::redirect('/teams/index/');
     } # end create
@@ -59,7 +74,7 @@ class teams_controller extends base_controller
         $this->template->content = View::instance('v_teams_view');
         $this->template->title = $result[0]['team_name'];
         $this->template->content->team_name = $result[0]['team_name'];
-
+        $this->template->content->team_id = $team_id;
         #Load dataTables css
         $client_files_head = Array(
             "/css/jquery.dataTables.css"
@@ -82,10 +97,21 @@ class teams_controller extends base_controller
     public function ajax_get_player_stats($team_id)
     {
         # Build the query to get all of the user's teams
-        $q = "SELECT player_name,singles,doubles,triples,home_runs,walks,intentional_walks,hit_by_pitch,runs,rbis,stolen_bases,sacrifice,strikeouts
-              FROM players,players_game_stats,teams
-              WHERE player_id = players_game_player_id
-              AND team_id = ".$team_id;
+        $q = "SELECT player_name, sum(singles) as singles,
+	        sum(doubles) as doubles,sum(triples) as triples,
+            sum(home_runs) as home_runs,sum(walks) as walks,
+            sum(intentional_walks) as intentional_walks,
+            sum(hit_by_pitch) as hit_by_pitch,sum(runs) as runs,
+            sum(rbis) as rbis,sum(stolen_bases) as stolen_bases,
+            sum(sacrifice) as sacrifice,sum(strikeouts) as strikeouts
+            FROM players, plays_for_team , players_game_stats, games , teams
+            WHERE player_id = players_player_id
+            AND player_id = players_game_player_id
+            AND teams_team_id = plays_for_team_id
+            AND team_id = plays_for_team_id
+            AND game_id = players_game_game_id
+            AND team_id = $team_id
+            GROUP BY player_id";
         $result = DB::instance(DB_NAME)->select_rows($q);
         $output['aaData'] = Array();
         $aColumns = array( 'player_name', 'singles', 'doubles', 'triples', 'home_runs', 'walks', 'intentional_walks', 'hit_by_pitch', 'runs', 'rbis', 'stolen_bases', 'sacrifice', 'strikeouts');

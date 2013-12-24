@@ -3,6 +3,7 @@
  */
 
 $(document).ready(function() {
+
     $('#teamData').dataTable( {
         "bPaginate": false,
         "bInfo": false,
@@ -10,7 +11,7 @@ $(document).ready(function() {
         "bSort": false,
         "bAutoWidth": false,
         "bServerSide": true,
-        "sAjaxSource": "/teams/ajax_get_player_stats/1",
+        "sAjaxSource": "/teams/ajax_get_player_stats/"+$("#team_id")[0].value,
         "fnFooterCallback": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
             /*
              * Calculate the total market share for all browsers in this table (ie inc. outside

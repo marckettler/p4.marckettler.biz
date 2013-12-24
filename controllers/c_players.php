@@ -57,7 +57,7 @@ class players_controller extends base_controller
         if($team_id!=0)
         {
             $_POST['players_player_id'] = $player_id;
-            $_POST['teams_team_id'] = $team_id;
+            $_POST['plays_for_team_id'] = $team_id;
             $_POST['number'] = $number;
             DB::instance(DB_NAME)->insert('plays_for_team',$_POST);
         }
@@ -86,7 +86,7 @@ class players_controller extends base_controller
         $q = "SELECT team_name,player_name
               FROM players, plays_for_team, teams
               WHERE player_id = players_player_id
-              AND team_id = teams_team_id
+              AND team_id = plays_for_team_id
               AND managers_user_id = ".$this->user->user_id;
 
         # Get teams of the currently logged in user

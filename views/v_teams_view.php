@@ -1,3 +1,4 @@
+<input type="hidden" id="team_id" value="<?=$team_id?>">
 <h3><span class="label label-success"><?=$team_name?></span></h3>
 <div class="table-responsive">
     <table id="teamData">

@@ -182,7 +182,7 @@ class games_controller extends base_controller
     private function valid_lineup($team_id)
     {
         # Build the query to get all of the user's teams
-        $q = "SELECT * FROM plays_for_team WHERE teams_team_id = ".$team_id;
+        $q = "SELECT * FROM plays_for_team WHERE plays_for_team_id = ".$team_id;
         $result = DB::instance(DB_NAME)->select_rows($q);
         return count($result)>=9;
 

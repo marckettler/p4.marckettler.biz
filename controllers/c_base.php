@@ -42,7 +42,7 @@ class base_controller {
         $q = "SELECT player_id,player_name , team_name , team_id
               FROM players,plays_for_team,teams
               WHERE player_id = players_player_id
-              AND team_id = teams_team_id
+              AND team_id = plays_for_team_id
               AND team_id = ".$team_id." ORDER BY player_id ASC";
         return DB::instance(DB_NAME)->select_rows($q);
 
@@ -53,10 +53,21 @@ class base_controller {
     protected function get_players_stats($team_id)
     {
         # Build the query to get all of the user's teams
-        $q = "SELECT * FROM players,plays_for_team,teams
-              WHERE player_id = players_player_id
-              AND team_id = teams_team_id
-              AND team_id = ".$team_id." ORDER BY batting ASC";
+        $q = "SELECT player_name, sum(singles) as singles,
+	        sum(doubles) as doubles,sum(triples) as triples,
+            sum(home_runs) as home_runs,sum(walks) as walks,
+            sum(intentional_walks) as intentional_walks,
+            sum(hit_by_pitch) as hit_by_pitch,sum(runs) as runs,
+            sum(rbis) as rbis,sum(stolen_bases) as stolen_bases,
+            sum(sacrifice) as sacrifice,sum(strikeouts) as strikeouts
+            FROM players, plays_for_team , players_game_stats, games , teams
+            WHERE player_id = players_player_id
+            AND player_id = players_game_player_id
+            AND teams_team_id = plays_for_team_id
+            AND team_id = plays_for_team_id
+            AND game_id = players_game_game_id
+            AND team_id = $team_id
+            GROUP BY player_id";
         return DB::instance(DB_NAME)->select_rows($q);
 
     } # end get_players
