@@ -39,10 +39,11 @@ class base_controller {
     protected function get_players($team_id)
     {
         # Build the query to get all of the user's teams
-        $q = "SELECT player_name,number,position FROM players,plays_for_team,teams
+        $q = "SELECT player_id,player_name , team_name , team_id
+              FROM players,plays_for_team,teams
               WHERE player_id = players_player_id
               AND team_id = teams_team_id
-              AND team_id = ".$team_id." ORDER BY batting ASC";
+              AND team_id = ".$team_id." ORDER BY player_id ASC";
         return DB::instance(DB_NAME)->select_rows($q);
 
     } # end get_players

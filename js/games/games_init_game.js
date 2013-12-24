@@ -8,7 +8,7 @@ var controlArea;
 $(document).ready(function() {
     $.ajax({
         type: 'POST',
-        url: '/games/load_team/'+$("#team_id")[0].value,
+        url: '/games/ajax_load_team/'+$("#game_id")[0].value,
         beforeSend: function() {
             // Display a loading message while waiting for the ajax call to complete
             $('.next-ab').hide();
@@ -23,6 +23,7 @@ $(document).ready(function() {
             $('h3').hide();
         },
         success: function(response) {
+            console.log(response);
             // Enject the results received from process.php into the results div
             $('.next-ab').show();
             $('.fo').show();

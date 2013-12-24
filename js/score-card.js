@@ -53,7 +53,7 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     //initialize and draw playerBoxes
     for (var i = 0; i < this.eventBoxes.length; i++)
     {
-        this.playerBoxes[i] = new PlayerBox(this.canvas[0],new Player(batters[i].player_name.substring(0,9),batters[i].number,batters[i].position),0,this.y);
+        this.playerBoxes[i] = new PlayerBox(this.canvas[0],new Player(batters[i].player_id,batters[i].player_name,batters[i].number,batters[i].position),0,this.y);
         this.playerBoxes[i].draw();
         this.y += 50;
     }
@@ -62,7 +62,7 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     this.lineScore.draw(this.hits,this.runs);
     this.y=25;
 
-    //initialize and draw EventBoxez
+    //initialize and draw EventBoxes
     for (var i = 0; i < this.eventBoxes[0].length; i++)
     {
         for (var j = 0; j < this.eventBoxes.length; j++)
@@ -410,9 +410,10 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
         this.currentAB = this.onDeck;
         // find next on deck
         this.onDeck = this.findEventBox(this.currentAB.abNum + 1);
-        //activate currentab playerbox and redraw.
+        //activate current ab playerbox and redraw.
         this.currentAB.playerBox.currentAB = true;
         this.currentAB.playerBox.draw();
+        $("#status").text("Now Batting "+this.currentAB.playerBox.player.name);
         //process end of inning
         if(this.outs==3)
         {
@@ -793,24 +794,28 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
         {
             // Single
             case 'S':
+                this.currentAB.playerBox.player.singles++;
                 this.hits++;
                 this.advanceAllOneRBI();
                 this.onFirst = this.currentAB;
                 break;
             // Double
             case 'D':
+                this.currentAB.playerBox.player.doubles++;
                 this.hits++;
                 this.advanceAllTwoRBI();
                 this.onSecond = this.currentAB;
                 break;
             // Triple
             case 'T':
+                this.currentAB.playerBox.player.triples++;
                 this.hits++;
                 this.advanceAllThreeRBI();
                 this.onThird = this.currentAB;
                 break;
             // Home Run
             case 'H':
+                this.currentAB.playerBox.player.home_runs++;
                 this.hits++;
                 this.currentAB.runScored();
                 this.runs++;
@@ -819,8 +824,35 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
                 break;
             // Walk, Intentional Walk, and HBP
             case 'W':
+                this.currentAB.playerBox.player.walks++;
+                //force only runner on first
+                if(this.onCorners())
+                {
+                    this.onSecond = this.onFirst;
+                    this.onFirst = null;
+                }//force runners
+                else if(this.onFirst!=null)
+                {
+                    this.advanceAllOneRBI();
+                }
+                this.onFirst = this.currentAB;
+            break;
             case 'I':
+                this.currentAB.playerBox.player.intentional_walks++;
+                //force only runner on first
+                if(this.onCorners())
+                {
+                    this.onSecond = this.onFirst;
+                    this.onFirst = null;
+                }//force runners
+                else if(this.onFirst!=null)
+                {
+                    this.advanceAllOneRBI();
+                }
+                this.onFirst = this.currentAB;
+                break;
             case 'B':
+                this.currentAB.playerBox.player.hit_by_pitch++;
                 //force only runner on first
                 if(this.onCorners())
                 {
@@ -835,10 +867,12 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
                 break;
             // Strikeout
             case 'K':
+                this.currentAB.playerBox.player.strikeouts++;
                 this.recordOut(this.currentAB);
                 break;
             case 'SF':
             case 'SH':
+                this.currentAB.playerBox.player.sacrifice++;
                 this.recordOut(this.currentAB);
                 this.advanceAllOneRBI();
                 break;
@@ -1139,71 +1173,88 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
         this.showRunners(this.currentAB);
     }
 
+    this.initScorecard = initScorecard;
+    function initScorecard()
+    {
+        this.endInning();
+        this.inning = 1;
+        this.x=120;
+        this.y=25;
+        this.abNum = 1;
+        this.runs = 0;
+        this.hits = 0;
+        this.currentAB.playerBox.currentAB = false;
+        this.currentAB.playerBox.draw();
+        //initialize and draw EventBoxez
+        for (var i = 0; i < this.eventBoxes[0].length; i++)
+        {
+            for (var j = 0; j < this.eventBoxes.length; j++)
+            {
+                this.eventBoxes[j][i] = new EventBox(this,this.canvas[0],this.playerBoxes[j],this.abNum,this.x,this.y);
+                this.eventBoxes[j][i].draw();
+                this.y += 50;
+                this.abNum++;
+            }
+            this.x += 50;
+            this.y = 25;
+        }
+        this.currentAB = this.eventBoxes[0][0];
+        this.onDeck = this.findEventBox(this.currentAB.abNum + 1);
+        this.startInning();
+        this.playLog = "";
+    }
+
     this.loadGame = loadGame;
     function loadGame(undo)
     {
         if(undo==1)
         {
-            this.endInning();
-            this.inning = 1;
-            this.x=120;
-            this.y=25;
-            this.abNum = 1;
-            //initialize and draw EventBoxez
-            for (var i = 0; i < this.eventBoxes[0].length; i++)
-            {
-                for (var j = 0; j < this.eventBoxes.length; j++)
-                {
-                    this.eventBoxes[j][i] = new EventBox(this,this.canvas[0],this.playerBoxes[j],this.abNum,this.x,this.y);
-                    this.eventBoxes[j][i].draw();
-                    this.y += 50;
-                    this.abNum++;
-                }
-                this.x += 50;
-                this.y = 25;
-            }
-            this.currentAB = this.eventBoxes[0][0];
-            this.onDeck = this.findEventBox(this.currentAB.abNum + 1);
-            this.startInning();
-            this.playLog = "";
+            this.initScorecard();
         }
         var scoreCard = this;
         $.ajax({
             type: 'POST',
             url: '/games/ajax_load_game/'+this.gameID,
             beforeSend: function() {
-                //update some message
+                $('#status').text('Loading Scorecard...');
             },
             success: function(response) {
+
                 var plays = $.parseJSON(response);
-                var play_log = plays[0].play_log.split(",");
-                console.log(play_log);
+                if(plays[0].play_log != null)
+                {
+                    var play_log = plays[0].play_log.split(",");
 
-                play_log.forEach(function(entry) {
-                    if(entry.length!=0)
-                    {
-                        if(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK')
+                    play_log.forEach(function(entry) {
+                        if(entry.length!=0)
                         {
-                            scoreCard.preAB(entry);
-                        }
+                            if(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK')
+                            {
+                                scoreCard.preAB(entry);
+                            }
 
-                        if(entry.substring(0,2)=='DP'||entry.substring(0,2)=='TP')
-                        {
-                            scoreCard.processDP(entry);
+                            if(entry.substring(0,2)=='DP'||entry.substring(0,2)=='TP')
+                            {
+                                scoreCard.processDP(entry);
+                            }
+                            else if(entry.substring(0,2)=='FC')
+                            {
+                                scoreCard.processFC(entry.substring(2));
+                            }
+                            else if(!(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK'))
+                            {
+                                scoreCard.processAB(entry);
+                                scoreCard.nextAB();
+                            }
                         }
-                        else if(entry.substring(0,2)=='FC')
-                        {
-                            scoreCard.processFC(entry.substring(2));
-                        }
-                        else if(!(entry.substring(0,2)=='SB'||entry.substring(0,2)=='CS'||entry.substring(0,2)=='PO'||entry.substring(0,2)=='PB'||entry.substring(0,2)=='WP'||entry.substring(0,2)=='BK'))
-                        {
-                            scoreCard.processAB(entry);
-                            scoreCard.nextAB();
-                        }
-                    }
-                });
+                    });
+                    (undo==1) ? $('#status').text("Undid Last Play") : $('#status').text("Game Loaded");
+                }
+                else
+                {
+                    $('#status').text("Game Started");
+                }
 
-                (undo==1) ? $('#status').text("Undid Last Play") : $('#status').text("Game Loaded");
 
                 scoreCard.loadFlag = 0;
             }
@@ -1420,7 +1471,7 @@ function ControlArea(scoreCard)
                 plays.push("");
                 $.ajax({
                     type: 'POST',
-                    url: '/games/save_play/'+plays+'/'+scoreCard.gameID+'/undo',
+                    url: '/games/ajax_save_play/'+plays+'/'+scoreCard.gameID+'/undo',
                     beforeSend: function() {
                         //update some message
                     },
@@ -1433,11 +1484,44 @@ function ControlArea(scoreCard)
             }
             else if(this.id=='close')
             {
-
+                $.ajax({
+                    type: 'POST',
+                    url: '/games/ajax_close_game/',
+                    beforeSend: function() {
+                        //update some message
+                    },
+                    success: function(response) {
+                        window.location.replace('/');
+                    }
+                }); // end ajax setup
             }
             else if(this.id=='end')
             {
+                for(var i=0;i<scoreCard.eventBoxes.length;i++)
+                {
+                        $.ajax({
+                            type: 'POST',
+                            url: '/players/ajax_update_player/',
+                            data: scoreCard.eventBoxes[i][0].playerBox.player,
+                            beforeSend: function() {
+                                //update some message
+                            },
+                            success: function(response) {
+                                $('#status').text(response);
+                            }
+                        }); // end ajax setup
+                }
 
+                $.ajax({
+                    type: 'POST',
+                    url: '/games/ajax_end_game/',
+                    beforeSend: function() {
+                        //update some message
+                    },
+                    success: function(response) {
+                        window.location.replace('/teams');
+                    }
+                }); // end ajax setup
             }
         });
 
@@ -1540,11 +1624,24 @@ function ControlArea(scoreCard)
  * @param position Players Position
  * @constructor
  */
-function Player(name,number,position)
+function Player(player_id,name,number,position)
 {
+    this.player_id = player_id;
     this.name = name;
     this.number = number;
     this.position = position;
+    this.singles = 0;
+    this.doubles = 0;
+    this.triples = 0;
+    this.home_runs = 0;
+    this.walks = 0;
+    this.intentional_walks = 0;
+    this.rbis = 0;
+    this.runs = 0;
+    this.stolen_bases = 0;
+    this.strikeouts = 0;
+    this.sacrifice = 0;
+    this.hit_by_pitch = 0;
 }
 
 /**
@@ -1580,7 +1677,7 @@ function PlayerBox(canvas,player,x,y)
         ctx.strokeRect(x,y,width,height);
         if(this.currentAB)
         {
-            ctx.fillStyle = "red";
+            ctx.fillStyle = "#7DDE7D";
             ctx.fillRect(x,y,width,height);
         }
         else
@@ -1601,7 +1698,7 @@ function PlayerBox(canvas,player,x,y)
         ctx.strokeRect(x,y+height,width/6,height);
         ctx.strokeRect(x+(width*(5/6)),y+height,width/6,height);
         ctx.fillText  (this.player.number,x+(width/40), y+(height/1.33));
-        ctx.fillText  (this.player.name,x+(width/4), y+(height/1.33));
+        ctx.fillText  (this.player.name.substring(0,9),x+(width/4), y+(height/1.33));
         ctx.fillText  (this.player.position,x+(width *.87), y+(height/1.33));
         ctx.font = oldFont;
     }
@@ -1701,6 +1798,8 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.fillStyle = 'black';
         this.ctx.fill();
         this.ctx.fillStyle = originalFill;
+        //update stats
+        this.playerBox.player.runs++;
     }
 
     this.onFirst = onFirst;
@@ -1751,6 +1850,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.beginPath();
         this.ctx.arc(this.x+(BOX_W_H *.86), this.y+(BOX_W_H *.44), BOX_W_H*.11, 0, 2 * Math.PI, false);
         this.ctx.stroke();
+        this.playerBox.player.rbis++;
     }
 
     this.rbiSecond = rbiSecond;
@@ -1762,6 +1862,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.beginPath();
         this.ctx.arc(this.x+(BOX_W_H *.51), this.y+(BOX_W_H *.12), BOX_W_H*.11, 0, 2 * Math.PI, false);
         this.ctx.stroke();
+        this.playerBox.player.rbis++;
     }
 
     this.rbiThird = rbiThird;
@@ -1773,6 +1874,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.beginPath();
         this.ctx.arc(this.x+(BOX_W_H *.14), this.y+(BOX_W_H *.45), BOX_W_H*.11, 0, 2 * Math.PI, false);
         this.ctx.stroke();
+        this.playerBox.player.rbis++;
     }
 
     this.rbiHome = rbiHome;
@@ -1785,6 +1887,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.beginPath();
         this.ctx.arc(this.x+(BOX_W_H *.51), this.y+(BOX_W_H *.83), BOX_W_H*.11, 0, 2 * Math.PI, false);
         this.ctx.stroke();
+        this.playerBox.player.rbis++;
     }
 
     this.noRBIFirst = noRBIFirst;
@@ -1900,6 +2003,10 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.fillText(how,this.x+(BOX_W_H *.60),this.y+(BOX_W_H *.30));
         //reset original lineWidth
         this.ctx.lineWidth = 1;
+        if(how.substring(0,2)=='SB')
+        {
+            this.playerBox.player.stolen_bases++;
+        }
     }
 
     this.toThird = toThird;
@@ -1919,6 +2026,10 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.fillText(how,this.x+(BOX_W_H *.20),this.y+(BOX_W_H *.30));
         //reset original lineWidth
         this.ctx.lineWidth = 1;
+        if(how.substring(0,2)=='SB')
+        {
+            this.playerBox.player.stolen_bases++;
+        }
     }
 
     this.toHome = toHome;
@@ -1938,6 +2049,10 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         this.ctx.fillText(how,this.x+(BOX_W_H *.07),this.y+(BOX_W_H *.75));
         //reset original lineWidth
         this.ctx.lineWidth = 1;
+        if(how.substring(0,2)=='SB')
+        {
+            this.playerBox.player.stolen_bases++;
+        }
     }
 
     this.outToSecond = outToSecond;
@@ -2034,9 +2149,9 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         {
             $.ajax({
                 type: 'POST',
-                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type,
+                url: '/games/ajax_save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type,
                 beforeSend: function() {
-                    //update some message
+                    $('#status').text('Processing Event...');
                 },
                 success: function(response) {
                     $('#status').text(response);
@@ -2059,9 +2174,9 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         {
             $.ajax({
                 type: 'POST',
-                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type+' by '+scoreCard.currentAB.playerBox.player.name,
+                url: '/games/ajax_save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type+' by '+scoreCard.currentAB.playerBox.player.name,
                 beforeSend: function() {
-                    //update some message
+                    $('#status').text('Processing Event...');
                 },
                 success: function(response) {
                     $('#status').text(response);
@@ -2084,9 +2199,9 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
         {
             $.ajax({
                 type: 'POST',
-                url: '/games/save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type,
+                url: '/games/ajax_save_play/'+scoreCard.playLog+'/'+scoreCard.gameID+'/'+type,
                 beforeSend: function() {
-                    //update some message
+                    $('#status').text('Processing Event...');
                 },
                 success: function(response) {
                     $('#status').text(response);
