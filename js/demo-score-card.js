@@ -1265,6 +1265,16 @@ function ControlArea(scoreCard)
             tpDialog.dialog("close");
         });
 
+    $(".hit")
+        .button()
+        .click(function(){
+           scoreCard.processAB(this.id);
+        });
+    $(".pre-hit")
+        .button()
+        .click(function(){
+            scoreCard.preAB(this.id);
+        });
     $( ".next-ab")
         .button()
         .click(function() {

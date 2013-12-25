@@ -7,9 +7,6 @@ class games_controller extends base_controller
     public function __construct()
 	{
 		parent::__construct();
-        /*if(!$this->user){
-            Router::redirect("/");
-        }*/
 	} # end constructor
 
     public function ajax_load_team($game_id)
@@ -53,6 +50,9 @@ class games_controller extends base_controller
     # $team_id of the team you are keeping score for
     public function init_game($team_id)
     {
+        if(!$this->user){
+            Router::redirect("/");
+        }
         $this->template->content = View::instance('v_games_game');
         //if the game is not current create a new game
         if(!isset($_COOKIE['game_id']))
@@ -71,7 +71,7 @@ class games_controller extends base_controller
         $this->template->content->game_id = $game_id;
 
         $client_files_h = Array(
-            '/css/p4.css',
+            '/css/scorecard.css',
             '/css/black-tie/jquery-ui-1.10.3.custom.css'
         );
         $client_files_b = Array(
@@ -91,30 +91,21 @@ class games_controller extends base_controller
     public function demo_game()
     {
         #Setup view
-        $this->template->content = View::instance('v_games_game');
+        $this->template->content = View::instance('v_games_demo');
         $this->template->title = 'New Game Info';
         $this->template->scoreCard = 'true';
 
         $client_files_h = Array(
-            '/css/p4.css',
+            '/css/scorecard.css',
             '/css/black-tie/jquery-ui-1.10.3.custom.css'
         );
         $client_files_b = Array(
-            '/js/jquery-1.9.1.js',
             '/js/jquery-ui-1.10.3.custom.js',
-            '/js/demo-score-card.js'
+            '/js/demo-score-card.js',
+            '/js/games/games_demo_game.js'
         );
         $this->template->client_files_head = Utils::load_client_files($client_files_h);
         $this->template->client_files_body = Utils::load_client_files($client_files_b);
-        $this->template->client_files_head .= '<script> var scoreCard;
-                                                        var controlArea;
-                                                        function pageLoad()
-                                                        {
-                                                            scoreCard = new ScoreCard($("#bg"),$("#fg"),9);
-                                                            controlArea = new ControlArea(scoreCard);
-                                                            scoreCard.controlArea = controlArea;
-                                                        }
-                                              </script>';
         echo $this->template;
     } # end init game
 
@@ -122,6 +113,9 @@ class games_controller extends base_controller
     # $team_id of the team you are keeping score for
     public function new_game()
     {
+        if(!$this->user){
+            Router::redirect("/");
+        }
         #Setup view
         $this->template->content = View::instance('v_games_new');
         $this->template->title = 'New Game Info';
@@ -158,6 +152,9 @@ class games_controller extends base_controller
 
     public function p_new_game()
     {
+        if(!$this->user){
+            Router::redirect("/");
+        }
         extract($_POST);
         $qArray = Array( "teams_team_id" => $team_id);
         # Insert using DB function that will sanitize the input

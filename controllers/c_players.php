@@ -26,7 +26,12 @@ class players_controller extends base_controller
         {
             $this->template->content->exists = true;
         }
+        # Load JS files
+        $client_files_body = Array(
+            "/js/players/players_create.js"
+        );
 
+        $this->template->client_files_body = Utils::load_client_files($client_files_body);
         # Get teams of the currently logged in user
         $teams = $this->get_my_teams();
         $this->template->content->teams = $teams;
@@ -65,6 +70,28 @@ class players_controller extends base_controller
         Router::redirect('/players/create/');
     } # end create
 
+    public function ajax_check_player_number()
+    {
+        if(is_numeric($_POST['player_number']))
+        {
+            $q = "SELECT * FROM plays_for_team
+              WHERE number = ".$_POST['player_number'].
+              " AND plays_for_team_id = ".$_POST['team_id'];
+            if(count(DB::instance(DB_NAME)->select_rows($q))>0)
+            {
+                echo "dupe";
+            }
+            else
+            {
+                echo "num";
+            }
+        }
+        else
+        {
+            echo "nan";
+        }
+    }
+
     public function ajax_update_player()
     {
         $player_id = $_POST['player_id'];
@@ -93,6 +120,25 @@ class players_controller extends base_controller
         $players = DB::instance(DB_NAME)->select_rows($q);
         $this->template->content->players = $players;
 
+        #Load dataTables css
+        $client_files_head = Array(
+            "/css/black-tie/jquery-ui-1.10.3.custom.min.css",
+            "/css/jquery.dataTables.css"
+        );
+
+        $this->template->client_files_head = Utils::load_client_files($client_files_head);
+
+
+        # Load JS files
+        $client_files_body = Array(
+            "/js/jquery-1.9.1.js",
+            "/js/jquery-ui-1.10.3.custom.min.js",
+            "/js/jquery.dataTables.js",
+            "/js/jquery.dataTables.rowReordering.js",
+            "/js/players/players_view_all.js"
+        );
+
+        $this->template->client_files_body = Utils::load_client_files($client_files_body);
         echo $this->template;
     }
 } # eoc

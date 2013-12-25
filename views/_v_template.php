@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet" media="screen" />
+    <link href="/css/p4.css" type="text/css" rel="stylesheet"  />
 	<!-- Controller Specific JS/CSS -->
 	<?php if(isset($client_files_head)) echo $client_files_head; ?>
 	
@@ -20,7 +21,7 @@
 
 <body>
     <div class="container">
-        <div class="navbar navbar-inverse navbar-static-top">
+        <div class="navbar navbar-default navbar-static-top">
             <div class="navbar-header">
                 <button class="navbar-toggle" data-toggle="collapse" data-target=".navHeaderCollapse">
                     <span class="icon-bar"></span>
@@ -63,7 +64,6 @@
                     <?php else: ?>
                         <li><a href="/users/login">Log In</a></li>
                         <li><a href="/users/create">Create Account</a></li>
-                        <li><a href="/games/demo_game">Demo ScoreCard</a></li>
                     <?php endif; ?>
                 </ul>
             </div>

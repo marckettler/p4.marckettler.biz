@@ -1,0 +1,22 @@
+@charset "utf-8";
+
+div{
+    position: relative;
+}
+
+div.scContainer{
+    float: left;
+    height: 555px;
+}
+
+div.controlArea{
+    position: relative;
+    float: right;
+    width: 275px;
+}
+
+canvas{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
