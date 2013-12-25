@@ -46,7 +46,7 @@
 
                         <? endforeach; ?>
                     </ul>
-                    <ul id="positions" class="pull-right positions">
+                    <ul id="positions" class="pull-left positions">
                         <li class="ui-state-default ui-state-disabled">Position</li>
                         <li class="ui-state-default">
                             <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
@@ -92,6 +92,11 @@
                             <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
                             DH
                             <input type="hidden" name="positions[]" value="0">
+                        </li>
+                        <li class="ui-state-default">
+                            <span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
+                            P
+                            <input type="hidden" name="positions[]" value="9">
                         </li>
                     </ul>
 
