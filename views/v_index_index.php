@@ -22,6 +22,10 @@
         </p>
 
         <p>
+            If you have an account you can  <a href="/users/login" class="btn btn-success">Log In</a>
+        </p>
+
+        <p>
             To see a demonstration version of the score card <a href="/games/demo_game" class="btn btn-primary">Click Here</a>
         </p>
     <? endif ?>
