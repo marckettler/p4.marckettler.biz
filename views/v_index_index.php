@@ -22,7 +22,8 @@
         </p>
 
         <p>
-            If you have an account you can  <a href="/users/login" class="btn btn-success">Log In</a>
+            If you have an account you can  <a href="/users/login" class="btn btn-success">Log In</a><br>
+            If you do not have an account you can  <a href="/users/create" class="btn btn-danger">Create Account</a>
         </p>
 
         <p>
