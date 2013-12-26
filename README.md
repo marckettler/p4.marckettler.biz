@@ -9,6 +9,8 @@ It can also be used while watching your favorite professional teams
 While many users can use this app currently you can only view your own teams and players.
 Team names are Unique so players must use different names for their teams.
 
+Sample data is loaded in the account: guest@guest.com pw: test
+
 Version 1.0.0
 
 - Demo Scorecard
