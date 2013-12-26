@@ -90,7 +90,7 @@ class teams_controller extends base_controller
         $this->template->content->team_name = $result[0]['team_name'];
         $this->template->content->team_id = $team_id;
         $this->template->content->player_count = count($this->get_players($team_id));
-        $this->template->content->game_count = count($this->ajax_get_player_stats($team_id));
+        $this->template->content->game_count = count($this->get_player_stats($team_id));
         #Load dataTables css
         $client_files_head = Array(
             "/css/jquery.dataTables.css"
@@ -110,6 +110,32 @@ class teams_controller extends base_controller
         echo $this->template;
     }
 
+
+    /**
+     * DB call to get stats of team_id
+     * @param $team_id
+     * @return array
+     */
+    public function get_player_stats($team_id)
+    {
+        # Build the query to get all of the user's teams
+        $q = "SELECT player_name, sum(singles) as singles,
+	        sum(doubles) as doubles,sum(triples) as triples,
+            sum(home_runs) as home_runs,sum(walks) as walks,
+            sum(intentional_walks) as intentional_walks,
+            sum(hit_by_pitch) as hit_by_pitch,sum(runs) as runs,
+            sum(rbis) as rbis,sum(stolen_bases) as stolen_bases,
+            sum(sacrifice) as sacrifice,sum(strikeouts) as strikeouts
+            FROM players, plays_for_team , players_game_stats, games , teams
+            WHERE player_id = players_player_id
+            AND player_id = players_game_player_id
+            AND teams_team_id = plays_for_team_id
+            AND team_id = plays_for_team_id
+            AND game_id = players_game_game_id
+            AND team_id = $team_id
+            GROUP BY player_id";
+            return DB::instance(DB_NAME)->select_rows($q);
+    }
     /**
      * Ajax call for getting players stats
      * @param $team_id
