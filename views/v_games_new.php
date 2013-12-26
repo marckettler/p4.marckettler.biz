@@ -16,7 +16,10 @@
                 </div>
             <?php endforeach; ?>
         <? else: ?>
-            <a href="/" class="list-group-item"> No valid teams. You must create at team or add players to an existing team min lineup is 9.</a>
+            <div class="list-group-item">
+                No valid teams. You must <a href="/teams/create" class="btn btn-danger">Create a Team</a> or <a href="/players/create" class="btn btn-danger">Add Players</a> to an existing team.<br>
+                The minimum line up for a team is 9 players.
+            </div>
         <? endif ?>
     </div>
 </div>

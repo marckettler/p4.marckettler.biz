@@ -34,8 +34,8 @@ class base_controller {
         return strip_tags($input);
     } # End stop_xss
 
-    # private helper function
-    # DB call that returns the $team_id roster to be displayed as a table
+    # protected helper function
+    # DB call that returns the roster of the $team_id
     protected function get_players($team_id)
     {
         # Build the query to get all of the user's teams
@@ -48,8 +48,8 @@ class base_controller {
 
     } # end get_players
 
-    # private helper function
-    # DB call that returns the $team_id roster to be displayed as a table
+    # protected helper function
+    # DB call that returns the stats of $team_id
     protected function get_players_stats($team_id)
     {
         # Build the query to get all of the user's teams
@@ -70,15 +70,16 @@ class base_controller {
             GROUP BY player_id";
         return DB::instance(DB_NAME)->select_rows($q);
 
-    } # end get_players
-    # private helper function
-    # DB call that returns the current user's teams or
+    } # end get_players_stats
+
+    # protected helper function
+    # DB call that returns the current user's teams
     protected function get_my_teams()
     {
         # Build the query to get all of the user's teams
         $q = "SELECT * FROM teams WHERE managers_user_id =".$this->user->user_id;
         return DB::instance(DB_NAME)->select_rows($q);
 
-    } # end get_all_users
+    } # end get_my_teams
 
 } # eoc

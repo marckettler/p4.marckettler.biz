@@ -55,9 +55,11 @@
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Games<b class="caret"></b></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Scorecards<b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li><a href="/games/new_game">New Game</a></li>
+                                <li><a href="/games/new_game">New Scorecard</a></li>
+                                <li><a href="/games/incomplete_game">Incomplete Scorecards</a></li>
+                                <li><a href="/games/completed_game">Completed Scorecards</a></li>
                             </ul>
                         </li>
                         <li><a href="/users/logout">Log Out</a></li>

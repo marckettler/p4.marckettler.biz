@@ -7,8 +7,12 @@
 
     <!-- List group -->
     <div class="list-group">
-        <? foreach($teams as $team): ?>
-            <p class="list-group-item"><a href="/teams/view/<?= $team['team_id'] ?>" class="btn btn-primary"><?= $team['team_name'] ?></a></p>
-        <?php endforeach; ?>
+        <? if(count($teams)>0): ?>
+            <? foreach($teams as $team): ?>
+                <p class="list-group-item"><a href="/teams/view/<?= $team['team_id'] ?>" class="btn btn-primary"><?= $team['team_name'] ?></a></p>
+            <?php endforeach; ?>
+        <? else: ?>
+            <p class="list-group-item"> You have no teams. <a href="/teams/create/" class="btn btn-danger">Create a Team</a></p>
+        <? endif ?>
     </div>
 </div>

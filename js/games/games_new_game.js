@@ -1,5 +1,6 @@
 /**
  * Created by Marc Kettler on 12/20/13.
+ * Used to set line ups and positions for a new game
  */
 $(document).ready(function() {
     var lineUps = $(".lineup");

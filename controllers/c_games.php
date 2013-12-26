@@ -28,7 +28,6 @@ class games_controller extends base_controller
     {
         $qArray = Array( "play_log" => $play_log);
         DB::instance(DB_NAME)->update('games',$qArray,"WHERE game_id = $game_id");
-
         echo $message;
     }
 
@@ -46,6 +45,45 @@ class games_controller extends base_controller
 
     }
 
+    public function load_game($game_id,$completed)
+    {
+        if(!$this->user){
+            Router::redirect("/");
+        }
+        $this->template->content = View::instance('v_games_game');
+        //if the game is not current create a new game
+        @setcookie("game_id", $game_id, strtotime('+1 year'), '/');
+        //get team name
+
+        $q = "SELECT team_id, team_name
+              FROM games, teams
+              WHERE managers_user_id = ".$this->user->user_id."
+              AND team_id = teams_team_id
+              AND game_id = $game_id";
+        $team = DB::instance(DB_NAME)->select_rows($q);
+        $this->template->content->load_game = $game_id;
+        $this->template->title = "Game $game_id";
+        $this->template->content->team_id = $team['team_id'];
+        $this->template->content->team_name = $team['team_name'];
+        $this->template->content->game_id = $game_id;
+        $this->template->content->completed = $completed;
+
+        $client_files_h = Array(
+            '/css/scorecard.css',
+            '/css/black-tie/jquery-ui-1.10.3.custom.css'
+        );
+        $client_files_b = Array(
+            '/js/jquery-1.9.1.js',
+            '/js/jquery-ui-1.10.3.custom.js',
+            '/js/score-card.js',
+            '/js/games/games_init_game.js'
+        );
+        $this->template->client_files_head = Utils::load_client_files($client_files_h);
+        $this->template->client_files_body = Utils::load_client_files($client_files_b);
+
+        echo $this->template;
+    } # end load game
+
     # Render Scorecard for a new game
     # $team_id of the team you are keeping score for
     public function init_game($team_id)
@@ -57,7 +95,7 @@ class games_controller extends base_controller
         //if the game is not current create a new game
         if(!isset($_COOKIE['game_id']))
         {
-            die("Something is horribly wrong");
+
         }
         //get team name
         $q = "SELECT team_name FROM teams WHERE $team_id = team_id";
@@ -150,6 +188,60 @@ class games_controller extends base_controller
         echo $this->template;
     } # end view
 
+    # Render Scorecard for a new game
+    # $team_id of the team you are keeping score for
+    public function incomplete_game()
+    {
+        if(!$this->user){
+            Router::redirect("/");
+        }
+        #Setup view
+        $this->template->content = View::instance('v_games_incomplete');
+        $this->template->title = 'Incomplete Games';
+        $this->template->content->teams = $this->get_incomplete();
+
+        $client_files_h = Array(
+            '/css/roster.css',
+            '/css/black-tie/jquery-ui-1.10.3.custom.css'
+        );
+        $client_files_b = Array(
+            '/js/jquery-1.9.1.js',
+            '/js/jquery-ui-1.10.3.custom.js'
+        );
+
+        $this->template->client_files_body = Utils::load_client_files($client_files_b);
+        $this->template->client_files_head = Utils::load_client_files($client_files_h);
+
+        echo $this->template;
+    } # end view
+
+    # Render Scorecard for a new game
+    # $team_id of the team you are keeping score for
+    public function completed_game()
+    {
+        if(!$this->user){
+            Router::redirect("/");
+        }
+        #Setup view
+        $this->template->content = View::instance('v_games_completed');
+        $this->template->title = 'Completed Games';
+        $this->template->content->teams = $this->get_completed();
+
+        $client_files_h = Array(
+            '/css/roster.css',
+            '/css/black-tie/jquery-ui-1.10.3.custom.css'
+        );
+        $client_files_b = Array(
+            '/js/jquery-1.9.1.js',
+            '/js/jquery-ui-1.10.3.custom.js'
+        );
+
+        $this->template->client_files_body = Utils::load_client_files($client_files_b);
+        $this->template->client_files_head = Utils::load_client_files($client_files_h);
+
+        echo $this->template;
+    } # end view
+
     public function p_new_game()
     {
         if(!$this->user){
@@ -197,6 +289,28 @@ class games_controller extends base_controller
               AND players_game_game_id = ".$game_id." ORDER BY batting ASC";
         return DB::instance(DB_NAME)->select_rows($q);
 
-    } # end get_players
+    } # end get_lineup
+
+    private function get_completed()
+    {
+        $q = "SELECT game_id, team_name
+              FROM games, teams
+              WHERE managers_user_id = ".$this->user->user_id."
+              AND team_id = teams_team_id
+              AND completed = 1";
+        return DB::instance(DB_NAME)->select_rows($q);
+    }
+
+    private function get_incomplete()
+    {
+        $my_teams = $this->get_my_teams();
+
+        $q = "SELECT game_id, team_name
+              FROM games, teams
+              WHERE managers_user_id = ".$this->user->user_id."
+              AND team_id = teams_team_id
+              AND completed = 0";
+        return DB::instance(DB_NAME)->select_rows($q);
+    }
 
 } # eoc

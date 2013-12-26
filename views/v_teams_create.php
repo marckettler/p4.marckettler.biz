@@ -9,6 +9,7 @@
                 <input type="text" class="form-control" name="team_name" id="teamName" placeholder="Team Name" required>
             </div>
             <button type="submit" class="btn btn-success">Create Team</button>
+            <a class="btn btn-danger" href="/teams/">Cancel</a>
         </form>
     </div>
 </div>

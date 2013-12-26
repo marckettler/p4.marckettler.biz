@@ -12,8 +12,10 @@ class teams_controller extends base_controller
         }
 	} # end constructor
 
-    # Index
-	public function index()
+    /**
+     * Teams Landing page
+     */
+    public function index()
 	{
         #Setup view
         $this->template->content = View::instance('v_teams_index');
@@ -26,7 +28,11 @@ class teams_controller extends base_controller
         echo $this->template;
 	} # end logout
 
-    # Create Team Page
+    /**
+     * Create team page
+     * @param null $dupe flag if team is a dupe
+     * @param null $team_name of the dupe team
+     */
     public function create($dupe=null,$team_name=NULL)
     {
         #Setup view
@@ -41,6 +47,9 @@ class teams_controller extends base_controller
         echo $this->template;
     } # end create
 
+    /**
+     * Process create team
+     */
     public function p_create()
     {
         # Clean input
@@ -63,6 +72,10 @@ class teams_controller extends base_controller
         Router::redirect('/teams/index/');
     } # end create
 
+    /**
+     * View Team
+     * @param $team_id the team to view
+     */
     public function view($team_id)
     {
         # Build the query to get all of the user's teams
@@ -70,11 +83,14 @@ class teams_controller extends base_controller
               FROM teams
               WHERE team_id = ".$team_id;
         $result = DB::instance(DB_NAME)->select_rows($q);
+
         #Setup view
         $this->template->content = View::instance('v_teams_view');
         $this->template->title = $result[0]['team_name'];
         $this->template->content->team_name = $result[0]['team_name'];
         $this->template->content->team_id = $team_id;
+        $this->template->content->player_count = count($this->get_players($team_id));
+        $this->template->content->game_count = count($this->ajax_get_player_stats($team_id));
         #Load dataTables css
         $client_files_head = Array(
             "/css/jquery.dataTables.css"
@@ -94,6 +110,10 @@ class teams_controller extends base_controller
         echo $this->template;
     }
 
+    /**
+     * Ajax call for getting players stats
+     * @param $team_id
+     */
     public function ajax_get_player_stats($team_id)
     {
         # Build the query to get all of the user's teams
@@ -113,6 +133,7 @@ class teams_controller extends base_controller
             AND team_id = $team_id
             GROUP BY player_id";
         $result = DB::instance(DB_NAME)->select_rows($q);
+
         $output['aaData'] = Array();
         $aColumns = array( 'player_name', 'singles', 'doubles', 'triples', 'home_runs', 'walks', 'intentional_walks', 'hit_by_pitch', 'runs', 'rbis', 'stolen_bases', 'sacrifice', 'strikeouts');
         foreach($result as $aRow)

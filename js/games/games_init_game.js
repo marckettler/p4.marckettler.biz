@@ -36,12 +36,13 @@ $(document).ready(function() {
             $('.fielders-choice-out').show();
             $('h3').show();
             var load = $('#load_game')[0].value;
+            var completed = $('#completed')[0].value;
             scoreCard = new ScoreCard($("#bg"),$("#fg"),$.parseJSON(response),$("#team_name")[0].value,$("#game_id")[0].value,load);
             controlArea = new ControlArea(scoreCard);
             scoreCard.controlArea = controlArea;
             if(load==1)
             {
-                scoreCard.loadGame(0);
+                scoreCard.loadGame(0,completed);
             }
         }
     }); // end ajax setup

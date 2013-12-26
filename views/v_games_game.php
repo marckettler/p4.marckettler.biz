@@ -1,5 +1,6 @@
 <div class="panel">
     <div class="panel-body">
+        <input type="hidden" id="completed" value="<?= $completed ?>">
         <input type="hidden" id="team_id" value="<?= $team_id ?>">
         <input type="hidden" id="team_name" value="<?= urldecode($team_name) ?>">
         <input type="hidden" id="game_id" value="<?= $game_id ?>">

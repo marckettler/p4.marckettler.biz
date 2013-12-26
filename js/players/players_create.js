@@ -15,14 +15,17 @@ $(document).ready(function() {
                 {
                     case 'dupe':
                         $("#playerNumberLabel").text("Player Number in use choose different number");
+                        $("#playerNumberLabel").addClass("alert-warning");
                         $("#createPlayerButton").attr("disabled", "disabled");
                     break;
                     case 'num':
                         $("#playerNumberLabel").text("Player Number");
+                        $("#playerNumberLabel").removeClass("alert-warning");
                         $("#createPlayerButton").removeAttr("disabled");
                     break;
                     case 'nan':
                         $("#playerNumberLabel").text("Player Number must be a number");
+                        $("#playerNumberLabel").addClass("alert-warning");
                         $("#createPlayerButton").attr("disabled", "disabled");
                     break;
                 }

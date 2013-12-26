@@ -1057,6 +1057,10 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     }// end postAB()
 
     this.processDP = processDP;
+    /**
+     * Process Double play events
+     * @param dpString string to parse
+     */
     function processDP(dpString)
     {
         switch(dpString)
@@ -1143,6 +1147,10 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     }
 
     this.processFC = processFC;
+    /**
+     * Process Fielder's Choice outs
+     * @param fcString
+     */
     function processFC(fcString)
     {
         // runner will be passed to fcOut
@@ -1174,6 +1182,9 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
     }
 
     this.initScorecard = initScorecard;
+    /**
+     * Used to initialize or reinitialize a scorecard
+     */
     function initScorecard()
     {
         this.endInning();
@@ -1204,8 +1215,22 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
         this.playLog = "";
     }
 
+    this.completed = completed;
+    /**
+     * If game is completed this method locks the control area
+     */
+    function completed()
+    {
+        this.controlArea.completed();
+    }
+
     this.loadGame = loadGame;
-    function loadGame(undo)
+    /**
+     * Used to load and reload the game when undo is pressed.
+     * @param undo
+     * @param completed
+     */
+    function loadGame(undo,completed)
     {
         if(undo==1)
         {
@@ -1255,7 +1280,10 @@ function ScoreCard(canvas,overlay,batters,teamName,gameID,loadFlag)
                     $('#status').text("Game Started");
                 }
 
-
+                if(completed == 1)
+                {
+                    scoreCard.completed();
+                }
                 scoreCard.loadFlag = 0;
             }
         }); // end ajax setup
@@ -1480,7 +1508,7 @@ function ControlArea(scoreCard)
                     }
                 }); // end ajax setup
                 scoreCard.loadFlag = 1;
-                scoreCard.loadGame(1);
+                scoreCard.loadGame(1,0);
             }
             else if(this.id=='close')
             {
@@ -1529,6 +1557,52 @@ function ControlArea(scoreCard)
         collapsible: true,
         heightStyle: "content"
     });
+
+    //Toggle Method for menu items when a runner is on base
+    this.toggleHits = toggleHits;
+    /**
+     * Toggle for Hits Menu Options
+     * @param option set to hide to hide menu options
+     */
+    function toggleHits(option)
+    {
+        this.accordion.accordion( "option", "active", 5 );
+        if(option == "hide")
+        {
+            this.brOptions.hide();
+            this.fcOptions.hide();
+            this.accordion.find( ".ui-accordion-header:eq(0)" ).hide();
+        }
+        else
+        {
+            this.brOptions.show();
+            this.fcOptions.show();
+            this.accordion.find( ".ui-accordion-header:eq(0)" ).show();
+        }
+    }
+
+    //Toggle Method for menu items when a runner is on base
+    this.toggleOuts = toggleOuts;
+    /**
+     * Toggle for Outs Menu Options
+     * @param option set to hide to hide menu options
+     */
+    function toggleOuts(option)
+    {
+        this.accordion.accordion( "option", "active", 5 );
+        if(option == "hide")
+        {
+            this.brOptions.hide();
+            this.fcOptions.hide();
+            this.accordion.find( ".ui-accordion-header:eq(1)" ).hide();
+        }
+        else
+        {
+            this.brOptions.show();
+            this.fcOptions.show();
+            this.accordion.find( ".ui-accordion-header:eq(1)" ).show();
+        }
+    }
 
     //Toggle Method for menu items when a runner is on base
     this.toggleBaseRunningEvents = toggleBaseRunningEvents;
@@ -1588,6 +1662,20 @@ function ControlArea(scoreCard)
             this.accordion.find( ".ui-accordion-header:eq(3)" ).show();
         }
     }
+
+    this.completed = completed;
+    /**
+     * Lockout controls when called
+     */
+    function completed()
+    {
+        this.hideAll();
+        this.toggleHits('hide');
+        this.toggleOuts('hide');
+        $( "#end").hide();
+        $( "#undo").hide();
+    }
+
     this.hideAll = hideAll;
     /**
      * Used to Hide all advanced menu options
@@ -1618,10 +1706,11 @@ function ControlArea(scoreCard)
 }
 
 /**
- * The Player class
- * @param name Players Name
- * @param number Players Number
- * @param position Players Position
+ * Player Class
+ * @param player_id
+ * @param name
+ * @param number
+ * @param position
  * @constructor
  */
 function Player(player_id,name,number,position)
@@ -2139,7 +2228,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
 
     this.preAB= preAB;
     /**
-     * Draws the event label for this ab such as S,D,T,H,W
+     * Draws the event label for this preAB event and saves the play to the db
      * @param type - The type of event that ended this batters at Bat
      */
     function preAB(type)
@@ -2162,8 +2251,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
 
     this.hit= hit;
     /**
-     * Called the hit function but should probably be renamed Event
-     * Draws the event label for this ab such as S,D,T,H,W
+     * Draws the event label for this ab such as S,D,T,H,W and saves the play to the db
      * @param type - The type of event that ended this batters at Bat
      */
     function hit(type)
@@ -2189,7 +2277,7 @@ function EventBox(scoreCard,canvas,playerBox,abNum,x,y)
 
     this.dp = dp;
     /**
-     * Draws the event label for this ab such as double plays
+     * Draws the event label for this ab such as double plays and saves the play to the db
      * @param type - The type of event that ended this batters at Bat
      */
     function dp(type)
